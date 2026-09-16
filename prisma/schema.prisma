@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Lot {
+  id                    String   @id @default(uuid())
+  titreFoncier          String   @unique @map("titre_foncier")
+  proprieteDite          String   @map("propriete_dite")
+  lotNumber             String?  @map("lot_number")
+  affaireRef            String?  @map("affaire_ref")
+  geometre              String?
+  dateLeve              DateTime? @map("date_leve")
+  serviceCadastre       String?  @map("service_cadastre")
+
+  surfaceDocumentM2     Decimal  @map("surface_document_m2") @db.Decimal(12, 2)
+  surfaceCalculeeM2     Decimal  @map("surface_calculee_m2") @db.Decimal(12, 2)
+  correctionLambertM2   Decimal  @map("correction_lambert_m2") @db.Decimal(12, 2)
+
+  /// PostGIS geometry(Polygon, 4326) — read/written via raw SQL, see lib/db/geometry.ts
+  polygon               Unsupported("geometry(Polygon, 4326)")?
+  /// PostGIS geometry(Point, 4326) — read/written via raw SQL, see lib/db/geometry.ts
+  centroid              Unsupported("geometry(Point, 4326)")?
+
+  sourcePdfUrl          String?  @map("source_pdf_url")
+
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  bornes                Borne[]
+  distanceChecks        DistanceCheck[]
+  referencePoints       ReferencePoint[]
+
+  @@map("lots")
+}
+
+model Borne {
+  id         String   @id @default(uuid())
+  lotId      String   @map("lot_id")
+  lot        Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  name       String
+  sequence   Int
+
+  xLambert   Decimal  @map("x_lambert") @db.Decimal(12, 3)
+  yLambert   Decimal  @map("y_lambert") @db.Decimal(12, 3)
+  lat        Decimal  @db.Decimal(10, 7)
+  lng        Decimal  @db.Decimal(10, 7)
+
+  @@map("bornes")
+  @@index([lotId])
+  @@unique([lotId, sequence])
+}
+
+model DistanceCheck {
+  id           String  @id @default(uuid())
+  lotId        String  @map("lot_id")
+  lot          Lot     @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  segmentLabel String  @map("segment_label")
+  croquisM     Decimal @map("croquis_m") @db.Decimal(10, 3)
+  calculeM     Decimal @map("calcule_m") @db.Decimal(10, 3)
+  ecartM       Decimal @map("ecart_m") @db.Decimal(10, 3)
+
+  @@map("distance_checks")
+  @@index([lotId])
+}
+
+model ReferencePoint {
+  id           String  @id @default(uuid())
+  lotId        String  @map("lot_id")
+  lot          Lot     @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  label        String
+  lat          Decimal @db.Decimal(10, 7)
+  lng          Decimal @db.Decimal(10, 7)
+  distanceM    Decimal @map("distance_m") @db.Decimal(10, 3)
+  bearingDeg   Decimal @map("bearing_deg") @db.Decimal(6, 2)
+
+  @@map("reference_points")
+  @@index([lotId])
+}

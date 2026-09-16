@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4-alpine
+    environment:
+      POSTGRES_DB: cadastre
+      POSTGRES_USER: cadastre
+      POSTGRES_PASSWORD: devpassword
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cadastre -d cadastre"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  ocr:
+    build: ./ocr-service
+    # Host port 8500, not 8000 — 7681-8180 is a Windows-reserved TCP range on this dev
+    # machine (Hyper-V/WSL2 NAT), and binding anywhere in it fails with an access error.
+    # Container-internal port stays 8000; the app service talks to it over the compose
+    # network (http://ocr:8000) unaffected by this, only host-side access needs :8500.
+    ports: ["8500:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://cadastre:devpassword@db:5432/cadastre
+      OCR_SERVICE_URL: http://ocr:8000
+    ports: ["3000:3000"]
+    depends_on:
+      db:
+        condition: service_healthy
+      ocr:
+        condition: service_healthy
+volumes:
+  pgdata:

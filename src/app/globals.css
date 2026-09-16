@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #efebde;
+  --paper-raised: #f7f4ea;
+  --ink: #1e2c3c;
+  --ink-muted: #4a5a6c;
+  --line: #c9c2ab;
+  --copper: #a65a28;
+  --copper-soft: #a65a281a;
+  --conforme: #3f6b4a;
+  --ecart: #a63328;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+}
+
+:root[data-theme="dark"] {
+  --paper: #161b22;
+  --paper-raised: #1d232c;
+  --ink: #e8e4d6;
+  --ink-muted: #9aa5b1;
+  --line: #333d4a;
+  --copper: #c97b45;
+  --copper-soft: #c97b4526;
+  --conforme: #6fae7d;
+  --ecart: #d9665a;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #161b22;
+    --paper-raised: #1d232c;
+    --ink: #e8e4d6;
+    --ink-muted: #9aa5b1;
+    --line: #333d4a;
+    --copper: #c97b45;
+    --copper-soft: #c97b4526;
+    --conforme: #6fae7d;
+    --ecart: #d9665a;
+
+    --background: var(--paper);
+    --foreground: var(--ink);
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-copper: var(--copper);
+  --color-copper-soft: var(--copper-soft);
+  --color-conforme: var(--conforme);
+  --color-ecart: var(--ecart);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-heading: var(--font-fraunces);
+  --font-mono: var(--font-ibm-plex-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-ibm-plex-mono), ui-monospace, monospace;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-heading {
+  font-family: var(--font-fraunces), serif;
+}
+
+.title-block {
+  border: 1px solid var(--line);
+  background: var(--paper-raised);
+}
+
+.maplibregl-popup-content {
+  background: var(--paper-raised) !important;
+  color: var(--ink) !important;
+  font-family: var(--font-ibm-plex-mono), ui-monospace, monospace !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: var(--paper-raised) !important;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
